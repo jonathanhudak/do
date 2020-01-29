@@ -1,136 +1,146 @@
 package main
 
-import (
-	"encoding/json"
-	"log"
-	"net/http"
-	"strconv"
-	"time"
+// import (
+// 	"database/sql"
+// 	"encoding/json"
+// 	"log"
+// 	"net/http"
+// 	"strconv"
+// 	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
-)
+// 	"github.com/gorilla/mux"
+// 	"github.com/jinzhu/gorm"
+// 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+// )
 
-type Entry struct {
-	gorm.Model
-	Title string
-}
+// type Entry struct {
+// 	gorm.Model
+// 	Title string
+// }
 
-func main() {
-	db, err := gorm.Open("sqlite3", "test.db")
-	if err != nil {
-		panic("failed to connect database")
-	}
-	defer db.Close()
+// type App struct {
+// 	Router *mux.Router
+// 	DB     *sql.DB
+// }
 
-	// Migrate the schema
-	db.AutoMigrate(&Entry{})
+// func EntryServer(a App) {
+// 	db, err := gorm.Open("sqlite3", "test.db")
+// 	if err != nil {
+// 		panic("failed to connect database")
+// 	}
+// 	defer db.Close()
 
-	r := mux.NewRouter()
+// 	// Migrate the schema
+// 	db.AutoMigrate(&Entry{})
 
-	// List Entries
-	r.HandleFunc("/api/entries", func(w http.ResponseWriter, req *http.Request) {
-		var entry []Entry
-		db.Find(&entry)
-		js, err := json.Marshal(entry)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-	}).Methods(http.MethodGet)
+// 	r := mux.NewRouter()
 
-	// Get Entry
-	r.HandleFunc("/api/entry/{id}", func(w http.ResponseWriter, req *http.Request) {
-		var entry Entry
-		vars := mux.Vars(req)
-		id, err := strconv.Atoi(vars["id"])
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
-			return
-		}
-		db.Find(&entry, id)
-		js, err := json.Marshal(entry)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-	}).Methods(http.MethodGet)
+// 	// List Entries
+// 	r.HandleFunc("/api/entries", func(w http.ResponseWriter, req *http.Request) {
+// 		var entry []Entry
+// 		db.Find(&entry)
+// 		js, err := json.Marshal(entry)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+// 		w.Header().Set("Content-Type", "application/json")
+// 		w.Write(js)
+// 	}).Methods(http.MethodGet)
 
-	// Create Entry
-	r.HandleFunc("/api/entry", func(w http.ResponseWriter, req *http.Request) {
-		var entry Entry
-		err := json.NewDecoder(req.Body).Decode(&entry)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
-			return
-		}
-		db.Create(&entry)
-		db.Take(&entry)
-		js, err := json.Marshal(entry)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-	}).Methods(http.MethodPost)
+// 	// Get Entry
+// 	r.HandleFunc("/api/entry/{id}", func(w http.ResponseWriter, req *http.Request) {
+// 		var entry Entry
+// 		vars := mux.Vars(req)
+// 		id, err := strconv.Atoi(vars["id"])
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+// 			return
+// 		}
+// 		db.Find(&entry, id)
+// 		js, err := json.Marshal(entry)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+// 		w.Header().Set("Content-Type", "application/json")
+// 		w.Write(js)
+// 	}).Methods(http.MethodGet)
 
-	// Update Entry
-	r.HandleFunc("/api/entry/{id}", func(w http.ResponseWriter, req *http.Request) {
-		vars := mux.Vars(req)
-		id, err := strconv.Atoi(vars["id"])
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
-			return
-		}
-		var entry, entryUpdate Entry
-		db.Find(&entry, id)
+// 	// Create Entry
+// 	r.HandleFunc("/api/entry", func(w http.ResponseWriter, req *http.Request) {
+// 		var entry Entry
+// 		err := json.NewDecoder(req.Body).Decode(&entry)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+// 			return
+// 		}
+// 		db.Create(&entry)
+// 		db.Take(&entry)
+// 		js, err := json.Marshal(entry)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+// 		w.Header().Set("Content-Type", "application/json")
+// 		w.Write(js)
+// 	}).Methods(http.MethodPost)
 
-		err = json.NewDecoder(req.Body).Decode(&entryUpdate)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
-			return
-		}
-		db.Model(&entry).Update("title", entryUpdate.Title)
-		db.Take(&entry)
-		js, err := json.Marshal(entry)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(js)
-	}).Methods(http.MethodPut)
+// 	// Update Entry
+// 	r.HandleFunc("/api/entry/{id}", func(w http.ResponseWriter, req *http.Request) {
+// 		vars := mux.Vars(req)
+// 		id, err := strconv.Atoi(vars["id"])
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+// 			return
+// 		}
+// 		var entry, entryUpdate Entry
+// 		db.Find(&entry, id)
 
-	// Delete Entry
-	r.HandleFunc("/api/entry/{id}", func(w http.ResponseWriter, req *http.Request) {
-		vars := mux.Vars(req)
-		id, err := strconv.Atoi(vars["id"])
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
-			return
-		}
-		var entry Entry
-		db.Find(&entry, id)
-		db.Delete(&entry)
+// 		err = json.NewDecoder(req.Body).Decode(&entryUpdate)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+// 			return
+// 		}
+// 		db.Model(&entry).Update("title", entryUpdate.Title)
+// 		db.Take(&entry)
+// 		js, err := json.Marshal(entry)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+// 		w.Header().Set("Content-Type", "application/json")
+// 		w.Write(js)
+// 	}).Methods(http.MethodPut)
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-	}).Methods(http.MethodDelete)
+// 	// Delete Entry
+// 	r.HandleFunc("/api/entry/{id}", func(w http.ResponseWriter, req *http.Request) {
+// 		vars := mux.Vars(req)
+// 		id, err := strconv.Atoi(vars["id"])
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+// 			return
+// 		}
+// 		var entry Entry
+// 		db.Find(&entry, id)
+// 		db.Delete(&entry)
 
-	http.Handle("/", r)
+// 		w.Header().Set("Content-Type", "application/json")
+// 		w.WriteHeader(http.StatusOK)
+// 	}).Methods(http.MethodDelete)
 
-	srv := &http.Server{
-		Handler:      r,
-		Addr:         "127.0.0.1:8000",
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
+// 	http.Handle("/", r)
 
-	log.Fatal(srv.ListenAndServe())
-}
+// 	srv := &http.Server{
+// 		Handler:      r,
+// 		Addr:         "127.0.0.1:8000",
+// 		WriteTimeout: 15 * time.Second,
+// 		ReadTimeout:  15 * time.Second,
+// 	}
+
+// 	log.Fatal(srv.ListenAndServe())
+// }
+
+// func main() {
+// 	EntryServer()
+// }
