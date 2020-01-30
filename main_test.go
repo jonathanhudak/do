@@ -18,12 +18,11 @@ var app App
 func setup() *App {
 	// Initialize an in-memory database for full integration testing.
 	app := &App{}
-	app.Initialize("sqlite3", "test.db")
+	app.Initialize("sqlite3", ":memory:")
 	return app
 }
 
 func teardown(app *App) {
-	app.DB.DropTable(&Entry{})
 	// Closing the connection discards the in-memory database.
 	app.DB.Close()
 }
