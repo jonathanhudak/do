@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,23 +11,6 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
-
-type App struct {
-	Router *mux.Router
-	DB     *gorm.DB
-}
-
-func (a *App) getEntries(w http.ResponseWriter, req *http.Request) {
-	var entry []Entry
-	a.DB.Find(&entry)
-	js, err := json.Marshal(entry)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(js)
-}
 
 func (a *App) Initialize(driverType, connectionStr string) {
 	var err error
@@ -43,6 +25,10 @@ func (a *App) Initialize(driverType, connectionStr string) {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/entries", a.getEntries).Methods(http.MethodGet)
+	r.HandleFunc("/api/entry/{id}", a.getEntry).Methods(http.MethodGet)
+	r.HandleFunc("/api/entry", a.createEntry).Methods(http.MethodPost)
+	r.HandleFunc("/api/entry/{id}", a.updateEntry).Methods(http.MethodPut)
+	r.HandleFunc("/api/entry/{id}", a.deleteEntry).Methods(http.MethodDelete)
 
 	a.Router = r
 }

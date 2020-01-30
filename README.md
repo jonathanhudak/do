@@ -1,3 +1,21 @@
+## Setup
+
+- [Install Go](https://golang.org/doc/install#install)
+- [Install dep](https://golang.github.io/dep/docs/installation.html)
+- `dep ensure`
+
+## Development
+
+```bash
+go run main.go
+```
+
+## Testing
+
+```bash
+go test -v
+```
+
 ### References
 
 - http://gorm.io/docs
